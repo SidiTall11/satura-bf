@@ -84,3 +84,29 @@ document.querySelector('#contact-form')?.addEventListener('submit', (event) => {
   const status = document.querySelector('#contact-status');
   if (status) status.textContent = 'Le formulaire est désactivé. Aucune donnée n’a été envoyée.';
 });
+
+// Hackathon walkthrough: structured scenario only; no name, phone, transcript, or audio.
+const demoIntakeForm = document.querySelector('#demo-intake-form');
+demoIntakeForm?.addEventListener('submit', async (event) => {
+  event.preventDefault();
+  const status = document.querySelector('#demo-intake-status');
+  const submitButton = demoIntakeForm.querySelector('button[type="submit"]');
+  const values = new FormData(demoIntakeForm);
+  submitButton.disabled = true;
+  if (status) status.textContent = 'Transmission au tableau de coordination…';
+  try {
+    const response = await fetch('/api/cases', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ category: values.get('category'), area: values.get('area'), scenario: values.get('scenario') === 'on' })
+    });
+    const result = await response.json();
+    if (!response.ok) throw new Error(result.error || 'La demande n’a pas pu être transmise.');
+    if (status) status.textContent = `Demande transmise · référence ${result.case.id}. Elle apparaît maintenant dans le tableau de coordination.`;
+    demoIntakeForm.reset();
+  } catch (error) {
+    if (status) status.textContent = `Le parcours interactif est indisponible. ${error.message} Pour une aide réelle, appelez le 80 00 12 87.`;
+  } finally {
+    submitButton.disabled = false;
+  }
+});

@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#222541">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Tableau de bord · Démonstration Sutura</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=DM+Serif+Display&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="dashboard.css">
+  <script src="dashboard.js" defer></script>
+</head>
+<body class="dashboard-page">
+  <aside class="dash-sidebar">
+    <a class="dash-brand" href="index.html"><span class="dash-mark">S</span><span>Sutura<small>BURKINA FASO</small></span></a>
+    <div class="dash-nav-label">ESPACE ÉQUIPE</div>
+    <a class="dash-nav active" href="dashboard.html"><span>▦</span> Vue d’ensemble</a>
+    <a class="dash-nav" href="contact.html"><span>⌖</span> Annuaire partenaires</a>
+    <div class="dash-sidebar-note"><span class="live-dot"></span> Espace équipe · Burkina Faso</div>
+  </aside>
+  <main class="dash-main">
+    <header class="dash-topbar"><div><span class="dash-eyebrow">SUTURA · COORDINATION</span><h1>Tableau de bord</h1></div><div class="dash-user"><span class="avatar">ST</span><span>Équipe Sutura<small>Burkina Faso</small></span></div></header>
+    <section class="demo-banner" role="status"><span class="demo-icon">↗</span><p><strong>Activité du parcours d’orientation</strong> <span>· Suivi des demandes, priorités d’équipe et relais partenaires.</span></p><span class="demo-tag">APERÇU HACKATHON</span></section>
+    <section class="dash-stats" aria-label="Indicateurs du parcours">
+      <article><span class="stat-label">Demandes reçues</span><strong id="stat-total">—</strong><span class="stat-foot">Sur la période affichée</span><span class="stat-icon orange">▤</span></article>
+      <article><span class="stat-label">À examiner</span><strong id="stat-review">—</strong><span class="stat-foot">Revue par l’équipe</span><span class="stat-icon blue">◎</span></article>
+      <article><span class="stat-label">Orientations en cours</span><strong id="stat-orient">—</strong><span class="stat-foot">Relais à coordonner</span><span class="stat-icon green">↗</span></article>
+      <article><span class="stat-label">Priorité élevée</span><strong id="stat-priority">—</strong><span class="stat-foot">Évaluation par l’équipe</span><span class="stat-icon violet">◇</span></article>
+    </section>
+    <section class="dash-content">
+      <div class="case-panel">
+        <div class="panel-heading"><div><span class="dash-eyebrow">SUIVI DES DEMANDES</span><h2>Dossiers récents</h2></div><button id="refresh-button" class="refresh-button" type="button"><span>↻</span> Actualiser</button></div>
+        <div class="case-table-wrap"><table><thead><tr><th>Référence</th><th>Zone</th><th>Demande</th><th>Priorité</th><th>Statut</th></tr></thead><tbody id="cases-body"><tr><td colspan="5" class="loading">Chargement des dossiers…</td></tr></tbody></table></div>
+        <p id="dashboard-error" class="dashboard-error" role="alert" hidden></p>
+        <div class="table-legend"><span><i></i> Vue de coordination · actualisée à la demande</span><span>Priorité confirmée par l’équipe</span></div>
+      </div>
+      <aside class="detail-panel"><div class="detail-top"><span class="dash-eyebrow">FICHE DE SUIVI</span><span class="detail-lock">⌑ Accès équipe</span></div><div id="case-detail" class="case-detail"><div class="detail-empty"><span>◎</span><h3>Sélectionnez un dossier</h3><p>Consultez les besoins et préparez l’orientation adaptée.</p></div></div></aside>
+    </section>
+    <section class="demo-workflow"><div><span class="dash-eyebrow">PARCOURS DE PRISE EN CHARGE</span><h2>De la demande à l’orientation</h2></div><div class="workflow-steps"><article><span>01</span><strong>Écouter</strong><small>Comprendre le besoin exprimé</small></article><b>→</b><article><span>02</span><strong>Évaluer</strong><small>Revue et priorité par l’équipe</small></article><b>→</b><article><span>03</span><strong>Orienter</strong><small>Coordonner avec le relais adapté</small></article></div></section>
+    <footer class="dash-footer"><span>© 2026 Sutura · Prototype de hackathon</span><a href="numero-vert.html">Voir le parcours public ↗</a></footer>
+  </main>
+</body>
+</html>

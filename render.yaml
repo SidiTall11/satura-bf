@@ -1,0 +1,20 @@
+services:
+  - type: web
+    name: sutura-bf
+    runtime: node
+    plan: 0.5c-512mb
+    region: frankfurt
+    buildCommand: node --check server.js && node --check script.js && node --check dashboard.js
+    startCommand: node server.js
+    healthCheckPath: /healthz
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: SUTURA_DATA_DIR
+        value: /var/data
+      - key: SUTURA_DEMO_TOKEN
+        generateValue: true
+    disk:
+      name: sutura-demo-data
+      mountPath: /var/data
+      sizeGB: 1
