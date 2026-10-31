@@ -31,6 +31,6 @@ Le serveur écoute uniquement sur `127.0.0.1`. Il n’est pas déployé par la c
 
 ## Préparer un hébergement Render pour le prototype
 
-Le serveur sait utiliser le port fourni par l’hébergeur, écouter sur `0.0.0.0` en production et servir `/healthz` pour le contrôle de disponibilité. Pour garder les statuts après un redémarrage sur Render, configure un Web Service avec la commande de démarrage `node server.js`, puis un disque persistant monté sur `/var/data` et la variable `SUTURA_DATA_DIR=/var/data`. Configure aussi `NODE_ENV=production` et un secret `SUTURA_DEMO_TOKEN` long et aléatoire. La page publique et l’API doivent rester sur ce même service/origine pour le flux temps réel.
+Le Blueprint Render utilise le plan gratuit. Le serveur écoute sur `0.0.0.0` en production, utilise le port fourni par l’hébergeur et expose `/healthz`. Le dossier JSON est conservé uniquement dans le système de fichiers éphémère du service. La page publique et l’API restent sur le même service/origine pour le flux temps réel.
 
-Le stockage JSON sur disque est adapté au prototype à instance unique. Avant d’y traiter de vrais dossiers, remplacer ce stockage par une base PostgreSQL, définir les accès et la conservation des données avec les responsables d’accompagnement, et mettre en place une authentification d’équipe dédiée.
+Le plan gratuit peut mettre le service en veille et réinitialiser les statuts lors d’un redémarrage ou redéploiement. Avant d’y traiter de vrais dossiers, remplacer ce stockage par une base PostgreSQL persistante, définir les accès et la conservation des données avec les responsables d’accompagnement, et mettre en place une authentification d’équipe dédiée.
