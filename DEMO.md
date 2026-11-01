@@ -13,6 +13,8 @@ node server.js
 
 Ouvrir ensuite `http://127.0.0.1:4174/dashboard.html`. Le serveur affiche un mot de passe temporaire : saisir l’identifiant `demo` et ce mot de passe lorsque le navigateur le demande. Garder le terminal ouvert pendant la présentation.
 
+**Aucun lien du site public ne mène au tableau de bord, et c'est voulu.** Le tableau de coordination est l'outil de l'équipe, pas une page que visite une personne qui cherche de l'aide. On l'ouvre en tapant son adresse, comme ci-dessus.
+
 Le port 4174 est choisi pour éviter le serveur de prévisualisation qui peut déjà utiliser le port 4173. On peut choisir un autre port en modifiant `PORT`.
 
 ## Ce que la démo permet
@@ -33,7 +35,7 @@ Le serveur écoute uniquement sur `127.0.0.1`. Il n’est pas déployé par la c
 
 Le dépôt sert deux choses différentes, et elles ne doivent pas être publiées de la même manière.
 
-La **vitrine** — les pages publiques et l'annuaire — est faite pour rester en ligne en permanence. Publiée sur un hébergement statique, elle appelle `/healthz` au chargement de la page du numéro vert ; si l'API n'est pas là, le parcours de démonstration et le lien vers le tableau de bord disparaissent d'eux-mêmes. `_redirects` masque en plus `dashboard.html`. Rien sur la vitrine ne peut donc proposer un service qui ne répondrait pas.
+La **vitrine** — les pages publiques et l'annuaire — est faite pour rester en ligne en permanence. Publiée sur un hébergement statique, elle appelle `/healthz` au chargement de la page du numéro vert ; si l'API n'est pas là, le parcours de démonstration disparaît de lui-même. `dashboard.html` n'est de toute façon relié à aucune page publique, et `_redirects` le masque en plus sur la vitrine. Rien sur la vitrine ne peut donc proposer un service qui ne répondrait pas.
 
 La **démonstration** — formulaire, tableau de coordination, flux temps réel — est un outil de soutenance. Elle a besoin du serveur Node et de l'API, donc d'un poste local ou d'une instance dédiée. C'est elle que l'équipe fait tourner le 7 ou 12 novembre.
 
