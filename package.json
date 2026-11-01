@@ -6,7 +6,9 @@
   "license": "Apache-2.0",
   "scripts": {
     "start": "node server.js",
-    "check": "node --check server.js && node --check script.js && node --check dashboard.js"
+    "check": "node --check server.js && node --check script.js && node --check dashboard.js",
+    "carte": "node tools/prep-carte.js",
+    "carte:verifier": "node tools/verifier-geo.js"
   },
   "engines": {
     "node": ">=18"

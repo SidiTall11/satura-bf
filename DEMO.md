@@ -20,10 +20,13 @@ Le port 4174 est choisi pour éviter le serveur de prévisualisation qui peut d�
 ## Ce que la démo permet
 
 - Charger six dossiers de présentation couvrant l’écoute, l’orientation psychosociale et juridique, la mise à l’abri et l’information santé.
-- Créer une demande structurée depuis la page du numéro vert et la voir apparaître instantanément dans le tableau de bord via Server-Sent Events.
+- Créer une demande structurée **depuis le tableau de coordination** (saisie d’un appel reçu) et la voir apparaître instantanément sur les autres postes ouverts via Server-Sent Events.
 - Consulter une zone et un type de demande inventés, sans identité, numéro de téléphone, transcription ni audio.
 - Modifier un statut de démonstration, enregistré localement dans `.sutura-demo/cases.json`.
 - Actualiser les indicateurs et la liste depuis l’API.
+- Montrer la **carte de couverture** sur `contact.html` : les 13 régions, les 3 qui ont un contact vérifié, la distance à vol d’oiseau pour les autres. Elle se charge avec le même serveur, sans appeler aucun service de cartographie.
+
+**La démonstration tient réseau coupé.** Pages, feuilles de style, polices, tracés régionaux et calculs de distance sont servis par le poste local : couper le Wi-Fi avant de lancer `node server.js` ne change rien à l’écran, et c’est ce qu’il faut vérifier la veille du jury.
 
 Pour réinitialiser les statuts, arrêter le serveur, supprimer le dossier local `.sutura-demo`, puis relancer `node server.js`. Le jeu initial est dans `data/demo-cases.json`.
 
@@ -35,7 +38,9 @@ Le serveur écoute uniquement sur `127.0.0.1`. Il n’est pas déployé par la c
 
 Le dépôt sert deux choses différentes, et elles ne doivent pas être publiées de la même manière.
 
-La **vitrine** — les pages publiques et l'annuaire — est faite pour rester en ligne en permanence. Elle ne contient **aucune saisie** : aucune page publique n'écrit dans l'API, et `dashboard.html` n'est relié à aucune d'elles. `_redirects` masque même le tableau de bord si l'on publie sans filtrer. Une vitrine publiée ne peut donc promettre un service qui ne répondrait pas.
+La **vitrine** — les pages publiques, l'annuaire et la carte de couverture — est faite pour rester en ligne en permanence. Elle ne contient **aucune saisie** : aucune page publique n'écrit dans l'API, et `dashboard.html` n'est relié à aucune d'elles. `_redirects` masque le tableau de bord, mais aussi `data/`, `docs/`, `tools/`, `server.js` et la configuration, si la publication se fait sans filtrer le dossier. Une vitrine publiée ne peut donc promettre un service qui ne répondrait pas.
+
+La carte est le seul élément des pages publiques qui lise des fichiers de données : `assets/geo/regions.json` (tracés) et `assets/geo/structures.json` (quatre positions vérifiées). Ce sont des fichiers statiques, en lecture seule, sans identifiant ni écriture possible.
 
 La **démonstration** — saisie d'un appel, tableau de coordination, flux temps réel — est un outil de soutenance. Elle a besoin du serveur Node et de l'API, donc d'un poste local ou d'une instance dédiée. C'est elle que l'équipe fait tourner le 7 ou 12 novembre.
 

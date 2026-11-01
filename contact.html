@@ -5,7 +5,7 @@
 <section class="section-wrap subpage-section" id="annuaire">
   <p class="kicker">ANNUAIRE VÉRIFIÉ</p>
   <h2>Des contacts d’aide au Burkina Faso.</h2>
-  <p class="directory-intro">Contacts repris des sites officiels consultés le 31 octobre 2026. Les horaires et la disponibilité peuvent changer : appelez avant de vous déplacer. Une procédure de mise à jour par les structures partenaires sera ajoutée après configuration du contact Sutura.</p>
+  <p class="directory-intro">Contacts repris des sites officiels consultés le 31 octobre 2026. Les horaires et la disponibilité peuvent changer : appelez avant de vous déplacer. Une procédure de mise à jour par les structures partenaires sera ajoutée après configuration du contact Sutura. <a class="text-link" href="#carte">Voir la carte de couverture du territoire&nbsp; ↓</a></p>
   <div class="directory-controls"><label for="resource-search">Rechercher une ville ou un service<input id="resource-search" type="search" placeholder="Ex. Bobo-Dioulasso, juridique…"></label><label for="resource-kind">Type de ressource<select id="resource-kind"><option value="all">Toutes les ressources</option><option value="vbg">Écoute et signalement VBG</option><option value="legal">Assistance juridique et psychosociale</option><option value="emergency">Urgences</option></select></label></div>
   <p class="directory-count" id="directory-count" aria-live="polite">8 ressources affichées</p>
   <div class="resource-list" id="resource-list">
@@ -18,5 +18,28 @@
     <article class="resource-card" data-kind="emergency" data-search="urgence sapeurs pompiers secours burkina national"><div><span class="resource-type">URGENCES · SECOURS</span><h3>Sapeurs-pompiers</h3><p>Numéro utile publié par la Police nationale.</p><a class="resource-source" href="https://www.police.gov.bf/index.php/a-votre-service/police-secours" target="_blank" rel="noopener">Source officielle · Police nationale ↗</a></div><a href="tel:18">18 <span>Appeler →</span></a></article>
     <article class="resource-card" data-kind="emergency" data-search="urgence gendarmerie sécurité burkina national"><div><span class="resource-type">URGENCES · GENDARMERIE</span><h3>Gendarmerie nationale</h3><p>Numéro utile publié par la Police nationale.</p><a class="resource-source" href="https://www.police.gov.bf/index.php/a-votre-service/police-secours" target="_blank" rel="noopener">Source officielle · Police nationale ↗</a></div><a href="tel:16">16 <span>Appeler →</span></a></article>
   </div>
+</section>
+<section class="section-wrap subpage-section map-section" id="carte">
+  <p class="kicker">COUVERTURE DU TERRITOIRE</p>
+  <h2>Ce que la carte montre,<br>et ce qu’elle ne montre pas.</h2>
+  <p class="map-intro">Sutura ne géolocalise aujourd’hui que quatre points d’aide : les cliniques juridiques de l’Association des Femmes Juristes du Burkina Faso, telles que publiées sur leur site officiel. Les dix autres régions restent grises. Le tracé des régions et les distances sont calculés dans votre navigateur à partir de limites administratives ouvertes, sans tuile ni service de cartographie externe.</p>
+  <div class="map-layout">
+    <figure class="map-frame">
+      <div id="coverage-map" class="coverage-map" aria-label="Carte des treize régions du Burkina Faso en cours de chargement."></div>
+      <p id="map-unavailable" class="map-fallback" hidden>Carte indisponible : les données de géométrie locale n’ont pas pu être lues. Les contacts vérifiés restent accessibles dans l’annuaire ci-dessus.</p>
+      <figcaption class="map-legend">
+        <span class="legend-item is-covered">Région avec un point d’aide vérifié</span>
+        <span class="legend-item is-empty">Région sans point d’aide vérifié</span>
+        <span class="legend-item is-marker">Structure localisée au centre de sa ville</span>
+      </figcaption>
+    </figure>
+    <aside class="map-detail" id="map-detail" aria-live="polite">
+      <p class="map-detail-eyebrow">COUVERTURE NATIONALE</p>
+      <h3 class="map-detail-title">3 régions sur 13</h3>
+      <p class="map-detail-text">Quatre points d’aide vérifiés et localisés : les cliniques juridiques de l’AFJ/BF à Ouagadougou, Bendogo, Bobo-Dioulasso et Ouahigouya. Les dix autres régions restent grises faute de contact vérifié.</p>
+    </aside>
+  </div>
+  <p class="map-source">Limites administratives : geoBoundaries Open — Burkina Faso ADM1 (licence CC BY 4.0), simplifiées à environ 3 km. Positions : centre des localités, jamais l’adresse d’un guichet. Une structure d’hébergement ne reçoit aucune coordonnée publiée.</p>
+  <noscript><p class="map-fallback">La carte interactive demande JavaScript. Les mêmes informations sont en texte dans l’annuaire ci-dessus : quatre cliniques juridiques de l’AFJ/BF à Ouagadougou, Bendogo, Bobo-Dioulasso et Ouahigouya, soit trois des treize régions du Burkina Faso.</p></noscript>
 </section></main><section class="emergency"><div><strong>En danger ? Appelez le 80 00 12 87</strong><span>Ligne nationale VBG · horaires et disponibilité à confirmer</span></div><a href="tel:80001287">Appeler maintenant →</a></section>
 <footer class="site-footer"><div class="footer-main"><div><a class="brand footer-brand" href="index.html">Sutura</a><p>Sutura · Burkina Faso<br>La technologie au service des survivantes. Le soin porté par la communauté, au Burkina Faso.</p></div><div class="footer-links"><div><span>Le site</span><a href="index.html">Accueil</a><a href="projet.html">Le projet</a><a href="plateforme.html">La plateforme</a></div><div><span>Agir</span><a href="numero-vert.html">Je cherche de l'aide</a><a href="plateforme.html">Je suis professionnel</a><a href="projet.html">Devenir partenaire</a></div><div><span>Contact</span><a href="tel:80001287">80 00 12 87</a><span>Ouagadougou, Burkina Faso</span></div></div></div><div class="footer-bottom"><span>© 2026 Sutura · Burkina Faso</span><a href="confidentialite.html">Confidentialité</a><a href="cgu.html">CGU</a></div></footer></body></html>
