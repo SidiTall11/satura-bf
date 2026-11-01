@@ -11,7 +11,7 @@ const LOCAL_DATA = path.resolve(process.env.SUTURA_DATA_DIR || path.join(ROOT, '
 const DATABASE = path.join(LOCAL_DATA, 'cases.json');
 const STATUSES = new Set(['À examiner', 'Orientation à préparer', 'En cours', 'Clôturé']);
 const token = process.env.SUTURA_DEMO_TOKEN || crypto.randomBytes(18).toString('base64url');
-const mimeTypes = { '.css': 'text/css; charset=utf-8', '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.json': 'application/json; charset=utf-8', '.png': 'image/png', '.svg': 'image/svg+xml' };
+const mimeTypes = { '.css': 'text/css; charset=utf-8', '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.json': 'application/json; charset=utf-8', '.png': 'image/png', '.svg': 'image/svg+xml', '.woff2': 'font/woff2' };
 const eventClients = new Set();
 const allowedAreas = new Set(['Ouagadougou · Centre', 'Bobo-Dioulasso · Houet', 'Koudougou · Boulkiemdé', 'Tenkodogo · Boulgou', 'Ouahigouya · Yatenga']);
 const allowedCategories = new Set(['Écoute et soutien', 'Orientation psychosociale', 'Information juridique', 'Mise à l’abri', 'Information santé']);
@@ -19,6 +19,17 @@ const allowedCategories = new Set(['Écoute et soutien', 'Orientation psychosoci
 function publishEvent(type, item) {
   const payload = `event: ${type}\ndata: ${JSON.stringify(item)}\n\n`;
   for (const response of eventClients) response.write(payload);
+}
+
+const intakeWindow = new Map();
+function intakeAllowed(ip) {
+  const now = Date.now();
+  const recent = (intakeWindow.get(ip) || []).filter((time) => now - time < 600000);
+  intakeWindow.set(ip, recent);
+  if (recent.length >= 5) return false;
+  recent.push(now);
+  if (intakeWindow.size > 500) intakeWindow.clear();
+  return true;
 }
 
 function readCases() {
@@ -52,7 +63,8 @@ function authorized(request, response) {
   const expectedBuffer = Buffer.from(expected);
   const valid = actualBuffer.length === expectedBuffer.length && crypto.timingSafeEqual(actualBuffer, expectedBuffer);
   if (!valid) {
-    response.writeHead(401, { 'www-authenticate': 'Basic realm="Sutura — démonstration locale", charset="UTF-8"', 'cache-control': 'no-store' });
+    // Les en-têtes HTTP doivent rester en ASCII : le tiret long fait planter Node.
+    response.writeHead(401, { 'www-authenticate': 'Basic realm="Sutura demo", charset="UTF-8"', 'cache-control': 'no-store' });
     response.end('Authentification requise.');
     return false;
   }
@@ -77,6 +89,9 @@ async function handleApi(request, response, pathname) {
   if (request.method === 'POST' && pathname === '/api/cases') {
     let body;
     try { body = await getRequestBody(request); } catch (error) { return sendJson(response, 400, { error: error.message }); }
+    if (!intakeAllowed(request.socket?.remoteAddress)) {
+      return sendJson(response, 429, { error: 'Trop de demandes de démonstration. Patientez quelques minutes.' });
+    }
     if (body.scenario !== true || !allowedAreas.has(body.area) || !allowedCategories.has(body.category)) {
       return sendJson(response, 400, { error: 'Choisissez une zone et un besoin du scénario de présentation.' });
     }
@@ -140,6 +155,11 @@ const server = http.createServer(async (request, response) => {
     return response.end('Méthode non autorisée.');
   }
   const requested = url.pathname === '/' ? '/index.html' : decodeURIComponent(url.pathname);
+  // '.git' et '.sutura-demo' contiennent l'historique et les dossiers : jamais servis.
+  if (requested.split('/').some((segment) => segment.startsWith('.'))) {
+    response.writeHead(404, { 'content-type': 'text/plain; charset=utf-8' });
+    return response.end('Page introuvable.');
+  }
   const filePath = path.resolve(ROOT, `.${requested}`);
   if (!filePath.startsWith(`${ROOT}${path.sep}`) || !fs.existsSync(filePath) || !fs.statSync(filePath).isFile()) {
     response.writeHead(404, { 'content-type': 'text/plain; charset=utf-8' });
@@ -150,7 +170,7 @@ const server = http.createServer(async (request, response) => {
     'x-content-type-options': 'nosniff',
     'referrer-policy': 'no-referrer',
     'cache-control': 'no-store',
-    'content-security-policy': "default-src 'self'; style-src 'self' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:; script-src 'self'; connect-src 'self'; object-src 'none'; base-uri 'self'; frame-ancestors 'none'"
+    'content-security-policy': "default-src 'self'; style-src 'self'; font-src 'self'; img-src 'self' data:; script-src 'self'; connect-src 'self'; object-src 'none'; base-uri 'self'; frame-ancestors 'none'"
   });
   if (request.method === 'HEAD') return response.end();
   fs.createReadStream(filePath).pipe(response);
