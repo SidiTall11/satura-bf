@@ -86,6 +86,16 @@ document.querySelector('#contact-form')?.addEventListener('submit', (event) => {
 });
 
 // Hackathon walkthrough: structured scenario only; no name, phone, transcript, or audio.
+// Without the demo API the section would promise a service that cannot answer, so it is removed.
+const demoSection = document.querySelector('#demo-signalement');
+if (demoSection) {
+  fetch('/healthz', { cache: 'no-store' })
+    .then((response) => { if (!response.ok) throw new Error('absent'); })
+    .catch(() => {
+      demoSection.remove();
+      document.querySelectorAll('.path-demo-link').forEach((link) => link.remove());
+    });
+}
 const demoIntakeForm = document.querySelector('#demo-intake-form');
 demoIntakeForm?.addEventListener('submit', async (event) => {
   event.preventDefault();

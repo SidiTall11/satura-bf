@@ -42,7 +42,24 @@ function renderCases() {
 }
 
 let selectedId = null;
-let eventsStarted = false;
+let events = null;
+let eventRetries = 0;
+
+// EventSource se reconnecte seul après une coupure, mais s'arrête définitivement
+// si le serveur refuse la connexion (veille d'un hébergeur, redémarrage).
+function startEvents() {
+  if (events || !('EventSource' in window) || eventRetries >= 5) return;
+  events = new EventSource('/api/events');
+  events.addEventListener('case-created', loadCases);
+  events.addEventListener('case-updated', loadCases);
+  events.addEventListener('error', () => {
+    if (events.readyState !== EventSource.CLOSED) return;
+    events.close();
+    events = null;
+    eventRetries += 1;
+    setTimeout(startEvents, 5000);
+  });
+}
 function selectCase(id) {
   selectedId = id;
   casesBody.querySelectorAll('tr[data-case-id]').forEach((row) => row.classList.toggle('selected', row.dataset.caseId === id));
@@ -67,12 +84,7 @@ async function loadCases() {
     if (!result.demo) throw new Error('Impossible de charger les dossiers.');
     demoCases = result.cases;
     renderCases();
-    if (!eventsStarted && 'EventSource' in window) {
-      const events = new EventSource('/api/events');
-      events.addEventListener('case-created', loadCases);
-      events.addEventListener('case-updated', loadCases);
-      eventsStarted = true;
-    }
+    startEvents();
   } catch (error) {
     errorBox.textContent = `${error.message} Cette page fonctionne uniquement avec le serveur local Sutura.`;
     errorBox.hidden = false;
