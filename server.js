@@ -160,6 +160,13 @@ const server = http.createServer(async (request, response) => {
     response.writeHead(404, { 'content-type': 'text/plain; charset=utf-8' });
     return response.end('Page introuvable.');
   }
+  // Le serveur ne livre que le site : ni son propre code, ni sa configuration.
+  const isPage = requested.endsWith('.html') && !requested.slice(1).includes('/');
+  const isRuntime = ['/fonts.css', '/styles.css', '/dashboard.css', '/script.js', '/dashboard.js'].includes(requested);
+  if (!isPage && !isRuntime && !requested.startsWith('/assets/')) {
+    response.writeHead(404, { 'content-type': 'text/plain; charset=utf-8' });
+    return response.end('Page introuvable.');
+  }
   const filePath = path.resolve(ROOT, `.${requested}`);
   if (!filePath.startsWith(`${ROOT}${path.sep}`) || !fs.existsSync(filePath) || !fs.statSync(filePath).isFile()) {
     response.writeHead(404, { 'content-type': 'text/plain; charset=utf-8' });
