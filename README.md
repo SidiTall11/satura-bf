@@ -60,7 +60,7 @@ Navigateur ── HTML/CSS/JS ──► serveur Node.js (stdlib uniquement)
                                      cases.json (écriture atomique)
 ```
 
-**624 lignes de code applicatif, zéro dépendance tierce.** Le projet n'appelle aucun `npm install`, aucun service d'abonnement, aucun SDK étranger. La page d'accueil et ses polices pèsent 231 Ko non compressés, **tous servis depuis la même origine : une page chargée ne quitte jamais le serveur du projet.**
+**423 lignes de JavaScript, 657 lignes au total (8 pages, 2 feuilles de style, 3 scripts), zéro dépendance tierce.** Le projet n'appelle aucun `npm install`, aucun service d'abonnement, aucun SDK étranger. Mesuré dans le navigateur : la page d'accueil se charge en **7 requêtes et 160 Ko non compressés, toutes dirigées vers la même origine** — une page chargée ne quitte jamais le serveur du projet.
 
 Le serveur est écrit avec les seuls modules `node:http`, `node:fs`, `node:path` et `node:crypto`. Voir [note de positionnement](docs/NOTE-SOUVERAINETE.md) pour l'argumentaire tiré de ce choix.
 
@@ -96,7 +96,7 @@ Le sujet impose une discrétion que le code doit assurer, pas seulement la chart
 - **Listes fermées** pour les zones et les besoins : aucune valeur libre n'atteint le stockage.
 - **Création de demandes limitée à cinq par poste et par dix minutes**, pour qu'une page publique ne puisse pas saturer le stockage.
 - **Requête plafonnée à 2 Ko**, écriture du fichier en deux temps (temporaire puis renommage), permissions `0600` et `0700`.
-- **Chemins cachés bloqués** à la distribution : ni `.git` ni le fichier de données ne sont téléchargeables par une requête HTTP.
+- **Liste blanche de fichiers servis** : le serveur ne livre que les pages, feuilles de style, scripts et polices du site. Ni `server.js`, ni la configuration, ni `.git`, ni le fichier de données ne sont téléchargeables par une requête HTTP.
 - **En-têtes de sécurité** sur chaque réponse : `Content-Security-Policy`, `X-Content-Type-Options`, `Referrer-Policy`, `frame-ancestors 'none'`.
 - **Échappement systématique** de toute valeur injectée dans le tableau de bord.
 - **Bouton « Quitter rapidement »** et touche Échap sur toutes les pages, pour un appareil partagé.
