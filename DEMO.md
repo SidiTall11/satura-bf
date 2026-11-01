@@ -35,7 +35,7 @@ Le dépôt sert deux choses différentes, et elles ne doivent pas être publiée
 
 La **vitrine** — les pages publiques et l'annuaire — est faite pour rester en ligne en permanence. Publiée sur un hébergement statique, elle appelle `/healthz` au chargement de la page du numéro vert ; si l'API n'est pas là, le parcours de démonstration et le lien vers le tableau de bord disparaissent d'eux-mêmes. `_redirects` masque en plus `dashboard.html`. Rien sur la vitrine ne peut donc proposer un service qui ne répondrait pas.
 
-La **démonstration** — formulaire, tableau de coordination, flux temps réel — est un outil de soutenu. Elle a besoin du serveur Node et de l'API, donc d'un poste local ou d'une instance dédiée. C'est elle que l'équipe fait tourner le 7 ou 12 novembre.
+La **démonstration** — formulaire, tableau de coordination, flux temps réel — est un outil de soutenance. Elle a besoin du serveur Node et de l'API, donc d'un poste local ou d'une instance dédiée. C'est elle que l'équipe fait tourner le 7 ou 12 novembre.
 
 ## Préparer un hébergement Render pour le prototype
 

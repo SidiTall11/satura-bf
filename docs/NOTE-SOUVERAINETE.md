@@ -3,7 +3,7 @@
 **Projet Sutura · Hackathon 226, édition 2026 · domaine Santé**
 Thème du concours : *accélérer la transformation digitale sécurisée et inclusive.*
 
-Ce document prépare le soutenu devant le jury du 12 novembre. Il sert aussi de pièce de dossier : il explique pourquoi les choix techniques du projet répondent au thème, et où ils ne y répondent pas encore.
+Ce document prépare la soutenance devant le jury du 12 novembre. Il sert aussi de pièce de dossier : il explique pourquoi les choix techniques du projet répondent au thème, et où ils ne y répondent pas encore.
 
 ---
 
@@ -68,7 +68,7 @@ Parce qu'un framework, c'est une dépendance à une communauté, à un cycle de 
 - Nous ne disons pas que le prototype est prêt à recevoir des dossiers réels. Il ne le sera qu'après les arbitrages de protection des données.
 - Nous ne prétendons pas remplacer les structures d'accompagnement. L'outil n'a de sens que si les centres qui reçoivent les femmes participent à sa conception.
 
-## 6. Trame du soutenu
+## 6. Trame de la soutenance
 
 | Temps | Appui | Ce qui est dit |
 |---|---|---|
@@ -78,4 +78,4 @@ Parce qu'un framework, c'est une dépendance à une communauté, à un cycle de 
 | 2 min | Page confidentialité + cette note | La position : ne pas collecter avant de décider. Le coût de l'erreur n'est pas un incident, c'est une exposition. |
 | 1 min | Feuille de route | Ce qui vient, dans quel ordre, et ce qui est refusé. |
 
-**Répéter la démonstration sur le poste qui servira le jour du jury**, avec le réseau coupé. Le flux temps réel fonctionne en local ; une connexion partagée un matin de soutenu est le seul élément qui peut faire échouer la manipulation.
+**Répéter la démonstration sur le poste qui servira le jour du jury**, avec le réseau coupé. Le flux temps réel fonctionne en local ; une connexion partagée un matin de soutenance est le seul élément qui peut faire échouer la manipulation.

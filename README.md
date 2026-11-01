@@ -121,7 +121,7 @@ styles.css  dashboard.css  fonts.css        feuilles de style
 assets/fonts/                                quatre polices variables, servies en local
 script.js   dashboard.js   server.js
 data/demo-cases.json                         jeu de dossiers fictifs de départ
-docs/NOTE-SOUVERAINETE.md                    argumentaire et préparation du soutenu
+docs/NOTE-SOUVERAINETE.md                    argumentaire et préparation de la soutenance
 netlify.toml  _headers  _redirects           publication de la vitrine
 render.yaml                                  instance de démonstration
 DEMO.md                                      consignes de la démonstration locale
