@@ -1,1 +1,11 @@
+# Le site publié ne doit jamais exposer le backend, les dossiers de démonstration ni la configuration.
 /dashboard.html  /index.html  404
+/data/*  /index.html  404
+/docs/*  /index.html  404
+/tools/*  /index.html  404
+/server.js  /index.html  404
+/package.json  /index.html  404
+/render.yaml  /index.html  404
+/netlify.toml  /index.html  404
+/README.md  /index.html  404
+/DEMO.md  /index.html  404
