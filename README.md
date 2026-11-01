@@ -39,7 +39,7 @@ Six pages publiques, sans framework ni étape de compilation :
 | Page | Rôle |
 |---|---|
 | `index.html` | Présentation du projet, état réel d'avancement, trois publics ciblés |
-| `numero-vert.html` | La ligne nationale, le parcours cible en 5 étapes, le parcours de démonstration |
+| `numero-vert.html` | La ligne nationale, le parcours cible en 5 étapes, les principes d'accès |
 | `contact.html` | Urgences (17, 18, 16), annuaire filtrable de 8 ressources sourcées |
 | `plateforme.html` | Feuille de route des services à construire avec les partenaires |
 | `projet.html` | Mission, vision, pistes de pérennisation, posture de protection des données |
@@ -60,7 +60,7 @@ Navigateur ── HTML/CSS/JS ──► serveur Node.js (stdlib uniquement)
                                      cases.json (écriture atomique)
 ```
 
-**423 lignes de JavaScript, 657 lignes au total (8 pages, 2 feuilles de style, 3 scripts), zéro dépendance tierce.** Le projet n'appelle aucun `npm install`, aucun service d'abonnement, aucun SDK étranger. Mesuré dans le navigateur : la page d'accueil se charge en **7 requêtes et 160 Ko non compressés, toutes dirigées vers la même origine** — une page chargée ne quitte jamais le serveur du projet.
+**414 lignes de JavaScript, 666 lignes au total (8 pages, 2 feuilles de style, 3 scripts), zéro dépendance tierce.** Le projet n'appelle aucun `npm install`, aucun service d'abonnement, aucun SDK étranger. Mesuré dans le navigateur : la page d'accueil se charge en **7 requêtes et 160 Ko non compressés, toutes dirigées vers la même origine** — une page chargée ne quitte jamais le serveur du projet.
 
 Le serveur est écrit avec les seuls modules `node:http`, `node:fs`, `node:path` et `node:crypto`. Voir [note de positionnement](docs/NOTE-SOUVERAINETE.md) pour l'argumentaire tiré de ce choix.
 
@@ -83,9 +83,9 @@ Pour repartir du jeu initial, arrêter le serveur puis supprimer le dossier `.su
 
 ### Ce que la démonstration montre
 
-Depuis `numero-vert.html`, choisir un besoin et une zone : la demande apparaît **instantanément** dans le tableau de bord, sans rechargement, via le flux Server-Sent Events. Un agent peut alors faire avancer le statut (`À examiner` → `Orientation à préparer` → `En cours` → `Clôturé`) et voir l'indicateur se mettre à jour chez tous les postes connectés.
+Depuis `dashboard.html`, l'agent enregistre un appel reçu : il choisit le besoin exprimé et la zone, et le dossier apparaît **instantanément** sur les autres postes de coordination ouverts, sans rechargement, via le flux Server-Sent Events. Il peut alors faire avancer le statut (`À examiner` → `Orientation à préparer` → `En cours` → `Clôturé`) et voir l'indicateur se mettre à jour chez tous les postes connectés.
 
-Ce que la démonstration ne fait pas, par conception : elle n'accepte qu'une zone et un besoin prédéfinis, ne reçoit **ni nom, ni téléphone, ni récit, ni audio**, et ne déclenche aucun envoi vers une structure.
+Ce que la démonstration ne fait pas, par conception : la saisie n'accepte qu'une zone et un besoin pris dans des listes fermées, n'enregistre **ni nom, ni téléphone, ni récit, ni audio**, et ne déclenche aucun envoi vers une structure.
 
 ## Protection intégrée
 
@@ -94,7 +94,7 @@ Le sujet impose une discrétion que le code doit assurer, pas seulement la chart
 - **Aucune donnée personnelle** n'est demandée ni stockée sur les pages publiques.
 - **Mots de passe comparés à temps constant** (`timingSafeEqual`), sans inscription en clair.
 - **Listes fermées** pour les zones et les besoins : aucune valeur libre n'atteint le stockage.
-- **Création de demandes limitée à cinq par poste et par dix minutes**, pour qu'une page publique ne puisse pas saturer le stockage.
+- **Création de dossiers réservée à l'espace d'équipe** (authentification exigée) et limitée à dix par poste et par dix minutes, pour qu'aucune page ne puisse saturer le stockage.
 - **Requête plafonnée à 2 Ko**, écriture du fichier en deux temps (temporaire puis renommage), permissions `0600` et `0700`.
 - **Liste blanche de fichiers servis** : le serveur ne livre que les pages, feuilles de style, scripts et polices du site. Ni `server.js`, ni la configuration, ni `.git`, ni le fichier de données ne sont téléchargeables par une requête HTTP.
 - **En-têtes de sécurité** sur chaque réponse : `Content-Security-Policy`, `X-Content-Type-Options`, `Referrer-Policy`, `frame-ancestors 'none'`.
