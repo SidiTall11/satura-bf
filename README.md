@@ -62,7 +62,7 @@ Navigateur ── HTML/CSS/JS ──► serveur Node.js (stdlib uniquement)
         mesurés dans le navigateur
 ```
 
-**693 lignes de JavaScript, 1 015 lignes au total (8 pages, 3 feuilles de style, 3 scripts), zéro dépendance tierce.** Le projet n'appelle aucun `npm install`, aucun service d'abonnement, aucun SDK étranger. Mesuré dans le navigateur : la page d'accueil se charge en **7 requêtes et 171 Ko non compressés, la page de contact avec sa carte en 9 requêtes et 185 Ko, toutes dirigées vers la même origine** — une page chargée ne quitte jamais le serveur du projet.
+**878 lignes de JavaScript, 1 219 lignes au total (8 pages, 3 feuilles de style, 3 scripts), zéro dépendance tierce.** Le projet n'appelle aucun `npm install`, aucun service d'abonnement, aucun SDK étranger. Mesuré dans le navigateur : la page d'accueil se charge en **7 requêtes et 178 Ko non compressés, la page de contact avec sa carte en 9 requêtes et 194 Ko — dont 12 Ko de données géographiques —, toutes dirigées vers la même origine** : une page chargée ne quitte jamais le serveur du projet.
 
 Le serveur est écrit avec les seuls modules `node:http`, `node:fs`, `node:path` et `node:crypto`. Voir [note de positionnement](docs/NOTE-SOUVERAINETE.md) pour l'argumentaire tiré de ce choix.
 
@@ -74,14 +74,16 @@ Aucune bibliothèque de cartographie, aucune tuile, aucun service d'itinéraire.
 |---|---|---|
 | 1. Collecte | `tools/prep-carte.js` | Limites administratives des 13 régions depuis **geoBoundaries Open — Burkina Faso ADM1** (licence **CC BY 4.0**) |
 | 2. Simplification | même script | Douglas-Peucker à 0,03° (~3 km) puis arrondi : **8 797 sommets → 647, soit −93 %**, fichier final de **9 Ko** |
-| 3. Positions | `assets/geo/structures.json` | Centre des localités des 4 cliniques juridiques publiées par l'AFJ/BF, jamais l'adresse d'un guichet |
-| 4. Rendu | `script.js` | Projection équirectangulaire calée sur l'emprise du pays (−5,52 ; 9,40 → 2,41 ; 15,08), corrigée en longitude à la latitude médiane, dessinée en SVG |
-| 5. Calculs | `script.js` | Rattachement des structures aux régions par test point-dans-le-polygone, centre géographique de chaque région (formule des aires), distance à vol d'oiseau (haversine) |
+| 3. Positions | `assets/geo/structures.json` | Points de localité issus de l'annuaire libre **OpenStreetMap** pour les quatre cliniques publiées par l'AFJ/BF — jamais l'adresse d'un guichet |
+| 4. Rendu | `script.js` | Projection équirectangulaire calée sur l'emprise du pays (−5,52 ; 9,40 → 2,41 ; 15,08), corrigée en longitude à la latitude médiane, dessinée en SVG ; noms des 13 régions posés au centre géographique, décalés ou tus quand ils gêneraient un marqueur ou dépasseraient le cadre ; zoom sur la région cliquée |
+| 5. Calculs | `script.js` | Rattachement des structures aux régions par test point-dans-le-polygone, centre géographique de chaque région (formule des aires), distance à vol d'oiseau (haversine) ; quand la région cliquée n'a aucun contact sur place, le cadre s'étend jusqu'au plus proche et une liaison pointillée relie les deux |
 | 6. Contrôle | `tools/verifier-geo.js` | Les mêmes calculs en Node.js (`npm run carte:verifier`) : les 4 structures tombent bien dans la région déclarée, et les 13 distances affichées sont reproductibles hors navigateur |
+
+**Ce sont les données d'OpenStreetMap qui sont utilisées, pas son service de cartes.** Publier des tuiles OSM dans la page aurait ajouté une origine externe à chaque visite, une dépendance à l'infrastructure d'un tiers et une coupure de la démonstration dès que le réseau tombe — trois choses que le thème du concours nous interdit. La page Contact porte donc la mention de licence ODbL et le lien vers la politique d'attribution d'OSM, comme l'exige cette licence, sans jamais appeler leurs serveurs.
 
 Résultat assumé : **3 régions sur 13** ont un point d'aide vérifié, et les 10 autres restent grises avec leur distance à la structure la plus proche (jusqu'à 260 km pour la région Est). La carte sert cet argument, pas notre confort : elle montre où l'orientation est possible et où elle ne l'est pas encore.
 
-Deux règles de protection bornent la couche géographique : une structure d'hébergement ne reçoit **jamais** de coordonnée publiée (seule sa ville apparaît), et les coordonnées publiées s'arrêtent au centre de la localité tant que l'adresse n'a pas été confirmée par appel.
+Une limite de précision est écrite dans le jeu de données : **OpenStreetMap ne contient aucune fiche pour les quatre cliniques citées** (vérifié le 1er novembre 2026, zéro résultat par nom). La coordonnée disponible s'arrête donc à la localité. Deux règles de protection bornent la couche géographique : une structure d'hébergement ne reçoit **jamais** de coordonnée publiée (seule sa ville apparaît), et une adresse de guichet n'est publiée qu'après confirmation par appel.
 
 ## Lancer la démonstration
 
@@ -129,8 +131,9 @@ Dans l'ordre, et sans raccourci sur le premier point :
 2. **Remplacer le stockage par fichier** par une base PostgreSQL persistante, avec sauvegardes et journal des accès.
 3. **Authentification d'équipe nominative**, avec rôles par structure, en remplacement du mot de passe partagé de démonstration.
 4. **Vérifier par appel** la disponibilité du numéro vert et des huit fiches de l'annuaire, affiner les quatre coordonnées qui s'arrêtent au centre de la localité, puis fixer une date de revue périodique.
-5. **Ouvrir un canal de contact** vers une adresse réelle pour les partenaires et les corrections d'annuaire.
-6. **Concevoir le parcours vocal** avec les structures partenaires, puis seulement le développer.
+5. **Étoffer le fond de carte** avec les données libres d'OpenStreetMap (villes repères, fleuves, axes principaux), extraites et simplifiées par un script du dépôt comme `tools/prep-carte.js`, jamais appelées en direct. La licence ODbL impose de citer les contributeurs à chaque affichage.
+6. **Ouvrir un canal de contact** vers une adresse réelle pour les partenaires et les corrections d'annuaire.
+7. **Concevoir le parcours vocal** avec les structures partenaires, puis seulement le développer.
 
 ## Structure du dépôt
 

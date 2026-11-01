@@ -1,6 +1,8 @@
 {
   "consulte": "2026-11-01",
-  "generateur": "OpenStreetMap Nominatim, recherche par localite (commune, pas par etablissement)",
+  "generateur": "Annuaire libre OpenStreetMap (Nominatim), recherche par localite et non par etablissement",
+  "attribution": "Donnees geographiques © les contributeurs OpenStreetMap, licence ODbL",
+  "limite": "Aucune fiche OpenStreetMap n'existe pour les quatre cliniques citees (verifie le 2026-11-01 : zero resultat de recherche par nom). La precision disponible s'arrete donc a la localite.",
   "regle": "Une structure d'hebergement ne recoit jamais de coordonnees publiees : seule sa ville apparait. Les positions ci-dessous visent le centre de la localite, jamais l'adresse du guichet.",
   "structures": [
     {
@@ -9,9 +11,9 @@
       "type": "Assistance juridique et psychosociale",
       "localite": "Ouagadougou",
       "region_declaree": "Centre",
-      "lat": 12.37,
-      "lon": -1.53,
-      "precision": "centre de la localite",
+      "lat": 12.36819,
+      "lon": -1.52709,
+      "precision": "point de localité OpenStreetMap",
       "telephones": ["+226 25 50 50 39"],
       "abri": false,
       "source": "https://afj-bf.org/services.php"
@@ -24,7 +26,7 @@
       "region_declaree": "Centre",
       "lat": 12.4,
       "lon": -1.46,
-      "precision": "centre de la localite",
+      "precision": "centre de la localité",
       "telephones": ["+226 67 10 22 15", "+226 53 69 46 78"],
       "abri": false,
       "source": "https://afj-bf.org/services.php"
@@ -37,7 +39,7 @@
       "region_declaree": "Hauts-Bassins",
       "lat": 11.18,
       "lon": -4.3,
-      "precision": "centre de la localite",
+      "precision": "centre de la localité",
       "telephones": ["+226 20 95 60 60"],
       "abri": false,
       "source": "https://afj-bf.org/services.php"
@@ -50,7 +52,7 @@
       "region_declaree": "Nord",
       "lat": 13.58,
       "lon": -2.42,
-      "precision": "centre de la localite",
+      "precision": "centre de la localité",
       "telephones": ["+226 07 33 33 33", "+226 52 29 26 29"],
       "abri": false,
       "source": "https://afj-bf.org/services.php"

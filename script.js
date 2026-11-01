@@ -103,6 +103,22 @@ function regionContenant(regions, lon, lat) {
   return regions.find((region) => region.geometrie.some((anneau) => dansAnneau(anneau, lon, lat)));
 }
 
+// Le centre géographique d'une région concave tombe parfois hors d'elle : on décale
+// l'ancrage du libellé le long d'une direction cardinale jusqu'à rester dans la région.
+function ancrageDuLibelle(region, centre) {
+  const dedans = (lon, lat) => region.geometrie.some((anneau) => dansAnneau(anneau, lon, lat));
+  if (dedans(centre.lon, centre.lat)) return centre;
+  const directions = [[1, 0], [-1, 0], [0, 1], [0, -1], [0.7, 0.7], [-0.7, 0.7], [0.7, -0.7], [-0.7, -0.7]];
+  for (let pas = 0.2; pas <= 3; pas += 0.2) {
+    for (const [dx, dy] of directions) {
+      const lon = centre.lon + dx * pas;
+      const lat = centre.lat + dy * pas;
+      if (dedans(lon, lat)) return { lat, lon };
+    }
+  }
+  return centre;
+}
+
 function plusGrandAnneau(region) {
   return region.geometrie.reduce((largest, anneau) => (anneau.length > largest.length ? anneau : largest), []);
 }
@@ -150,6 +166,12 @@ function noeudHtml(nom, classe, texte) {
   const element = document.createElement(nom);
   if (classe) element.className = classe;
   if (texte !== undefined) element.textContent = texte;
+  return element;
+}
+
+function etiquette(x, y, texte, classes) {
+  const element = noeudSvg('text', { x: x.toFixed(1), y: y.toFixed(1), class: classes });
+  element.textContent = texte;
   return element;
 }
 
@@ -212,6 +234,100 @@ function dessinerCouverture(frame, detail, territoire, structures) {
   });
 
   let epingle = null;
+  const boutonReprise = document.querySelector('#map-reset');
+
+  // Renvoie le cadre d'une région, élargi au contact vérifié le plus proche quand la
+  // région n'en compte aucun : l'écart kilométrique annoncé dans le panneau se voit.
+  function cadre(mesure) {
+    let ouest = Infinity;
+    let est = -Infinity;
+    let haut = Infinity;
+    let bas = -Infinity;
+    mesure.region.geometrie.forEach((anneau) => anneau.forEach(([lon, lat]) => {
+      const x = abscisse(lon);
+      const y = ordonnee(lat);
+      ouest = Math.min(ouest, x);
+      est = Math.max(est, x);
+      haut = Math.min(haut, y);
+      bas = Math.max(bas, y);
+    }));
+    const region = { ouest, est, haut, bas };
+    const horsPortee = mesure.locales.length === 0 && mesure.proche;
+    if (!horsPortee) {
+      return { ...region, largeur: est - ouest, hauteur: bas - haut, horsPortee: false };
+    }
+    const x = abscisse(mesure.proche.lon);
+    const y = ordonnee(mesure.proche.lat);
+    return {
+      ouest: Math.min(ouest, x),
+      haut: Math.min(haut, y),
+      largeur: Math.max(est, x) - Math.min(ouest, x),
+      hauteur: Math.max(bas, y) - Math.min(haut, y),
+      horsPortee: true,
+      aGauche: x <= region.ouest + 1,
+      aDroite: x >= region.est - 1,
+      auDessus: y <= region.haut + 1,
+      auDessous: y >= region.bas - 1,
+    };
+  }
+
+  // Le dessin est mis à l'échelle par le navigateur : les marqueurs et les libellés
+  // sont recalculés en unités utilisateur pour rester lisibles quand on zoome.
+  function ajusterEchelle() {
+    const vue = svg.getAttribute('viewBox').split(' ').map(Number);
+    const ratio = vue[2] / (svg.getBoundingClientRect().width || vue[2]);
+    svg.style.setProperty('--k', ratio.toFixed(3));
+    svg.querySelectorAll('.marker-halo').forEach((cercle) => cercle.setAttribute('r', (8 * ratio).toFixed(2)));
+    svg.querySelectorAll('.marker-dot').forEach((cercle) => cercle.setAttribute('r', (4.6 * ratio).toFixed(2)));
+    svg.querySelectorAll('.locality-label').forEach((libelle) => {
+      const cote = Number(libelle.dataset.cote);
+      libelle.setAttribute('x', (Number(libelle.dataset.x) + 11 * ratio * cote).toFixed(1));
+      libelle.setAttribute('y', (Number(libelle.dataset.y) + 4 * ratio).toFixed(1));
+    });
+    // Un libellé qui dépasse du cadre serait coupé en plein mot : on le retire.
+    const depasse = (libelle) => {
+      if (getComputedStyle(libelle).display === 'none') return false;
+      const b = libelle.getBBox();
+      return b.x < vue[0] || b.y < vue[1] || b.x + b.width > vue[0] + vue[2] || b.y + b.height > vue[1] + vue[3];
+    };
+    svg.querySelectorAll('.locality-label, .region-label').forEach((libelle) => libelle.classList.toggle('is-out', depasse(libelle)));
+  }
+
+  function encadrer(mesure) {
+    const b = cadre(mesure);
+    const marge = 26;
+    let gauche = marge;
+    let droite = marge;
+    let haut = marge;
+    let bas = marge;
+    if (b.horsPortee) {
+      // Le contact désigné par la liaison doit rester nommé dans le cadre :
+      // la place de son libellé s'ajoute du côté où il se trouve.
+      if (b.aGauche) gauche += 90;
+      if (b.aDroite) droite += 90;
+      if (b.auDessus) haut += 40;
+      if (b.auDessous) bas += 40;
+      liaison.setAttribute('x1', abscisse(mesure.centre.lon).toFixed(1));
+      liaison.setAttribute('y1', ordonnee(mesure.centre.lat).toFixed(1));
+      liaison.setAttribute('x2', abscisse(mesure.proche.lon).toFixed(1));
+      liaison.setAttribute('y2', ordonnee(mesure.proche.lat).toFixed(1));
+    }
+    svg.classList.add('is-zoomed');
+    svg.setAttribute('viewBox', `${(b.ouest - gauche).toFixed(1)} ${(b.haut - haut).toFixed(1)} ${(b.largeur + gauche + droite).toFixed(1)} ${(b.hauteur + haut + bas).toFixed(1)}`);
+    liaison.classList.toggle('is-shown', b.horsPortee);
+    if (boutonReprise) boutonReprise.hidden = false;
+    ajusterEchelle();
+  }
+
+  function voirLePays() {
+    svg.classList.remove('is-zoomed');
+    svg.setAttribute('viewBox', `0 0 ${largeur.toFixed(1)} ${hauteur.toFixed(1)}`);
+    liaison.classList.remove('is-shown');
+    epingle = null;
+    if (boutonReprise) boutonReprise.hidden = true;
+    relacher();
+    ajusterEchelle();
+  }
 
   function relacher() {
     svg.querySelectorAll('.is-active').forEach((element) => element.classList.remove('is-active'));
@@ -249,15 +365,20 @@ function dessinerCouverture(frame, detail, territoire, structures) {
     chemin.addEventListener('click', () => {
       epingle = chemin;
       activer(chemin, mesure);
+      encadrer(mesure);
     });
     chemin.addEventListener('keydown', (event) => {
       if (event.key !== 'Enter' && event.key !== ' ') return;
       event.preventDefault();
       epingle = chemin;
       activer(chemin, mesure);
+      encadrer(mesure);
     });
     svg.append(chemin);
   });
+
+  const liaison = noeudSvg('line', { class: 'link-line', x1: 0, y1: 0, x2: 0, y2: 0 });
+  svg.append(liaison);
 
   structures.forEach((structure) => {
     const mesure = mesures.find((item) => item.locales.includes(structure));
@@ -265,7 +386,7 @@ function dessinerCouverture(frame, detail, territoire, structures) {
       class: 'structure-marker',
       tabindex: '0',
       role: 'button',
-      'aria-label': `${structure.nom}, ${structure.localite} : position au centre de la localité.`,
+      'aria-label': `${structure.nom}, ${structure.localite} : ${structure.precision}.`,
     });
     groupe.append(
       noeudSvg('circle', { cx: abscisse(structure.lon).toFixed(1), cy: ordonnee(structure.lat).toFixed(1), r: 8, class: 'marker-halo' }),
@@ -287,9 +408,29 @@ function dessinerCouverture(frame, detail, territoire, structures) {
     groupe.addEventListener('click', () => {
       epingle = chemin;
       afficher();
+      encadrer(mesure);
     });
     svg.append(groupe);
   });
+
+  const libelles = noeudSvg('g', { class: 'label-layer' });
+  mesures.forEach((mesure) => {
+    const ancrage = ancrageDuLibelle(mesure.region, mesure.centre);
+    const libelle = etiquette(abscisse(ancrage.lon), ordonnee(ancrage.lat), mesure.region.nom, `region-label${mesure.locales.length ? ' on-covered' : ''}`);
+    libelle.dataset.largeur = cadre(mesure).largeur.toFixed(1);
+    libelles.append(libelle);
+  });
+  structures.forEach((structure) => {
+    const mesure = mesures.find((item) => item.locales.includes(structure));
+    // Deux points d'aide d'une même ville sont écrits de part et d'autre de leur marqueur.
+    const cote = mesure && mesure.locales.indexOf(structure) % 2 ? -1 : 1;
+    const libelle = etiquette(abscisse(structure.lon), ordonnee(structure.lat), structure.localite, `locality-label${cote < 0 ? ' on-left' : ''}`);
+    libelle.dataset.x = abscisse(structure.lon).toFixed(1);
+    libelle.dataset.y = ordonnee(structure.lat).toFixed(1);
+    libelle.dataset.cote = cote;
+    libelles.append(libelle);
+  });
+  svg.append(libelles);
 
   const chiffres = (paires) => {
     const bloc = noeudHtml('div', 'map-figure');
@@ -314,7 +455,7 @@ function dessinerCouverture(frame, detail, territoire, structures) {
       chiffres([[String(mesures.length), 'régions'], [String(couvertes.length), 'avec un contact vérifié'], [String(structures.length), 'points d’aide localisés']]),
       noeudHtml('p', 'map-detail-text', `Seules les structures publiées par leurs propres sites officiels sont géolocalisées. Les ${sansCouverture.length} régions grises n’ont encore aucun contact vérifié.`),
       avertissement && noeudHtml('p', 'map-detail-warning', avertissement),
-      noeudHtml('p', 'map-detail-hint', 'Survolez une région ou atteignez-la au clavier avec la touche Tab pour lire son état.'),
+      noeudHtml('p', 'map-detail-hint', 'Survolez une région pour lire son état, cliquez dessus pour zoomer. Une région sans contact sur place est encadrée jusqu’au plus proche, relié par un trait pointillé. Au clavier : touche Tab puis Entrée.'),
     ]);
   }
 
@@ -354,8 +495,52 @@ function dessinerCouverture(frame, detail, territoire, structures) {
     ]);
   }
 
+  function disposerLesLibelles() {
+    svg.querySelectorAll('.region-label').forEach((libelle) => {
+      libelle.classList.remove('is-tiny');
+      if (libelle.getComputedTextLength() > Number(libelle.dataset.largeur) * 1.15) libelle.classList.add('is-tiny');
+    });
+    // Deux libellés qui se chevauchent s'effacent : les régions équipées et les plus
+    // vastes gardent leur nom, les autres le retrouvent quand on zoome sur elles.
+    const files = [...svg.querySelectorAll('.region-label:not(.is-tiny)')].sort((a, b) =>
+      (Number(b.classList.contains('on-covered')) - Number(a.classList.contains('on-covered')))
+      || (Number(b.dataset.largeur) - Number(a.dataset.largeur)));
+    const placees = [...svg.querySelectorAll('.marker-dot')].map((cercle) => {
+      const rayon = Number(cercle.getAttribute('r')) * 1.7;
+      return {
+        x: Number(cercle.getAttribute('cx')) - rayon,
+        y: Number(cercle.getAttribute('cy')) - rayon,
+        largeur: 2 * rayon,
+        hauteur: 2 * rayon,
+      };
+    });
+    const genante = (place) => placees.some((p) => place.x < p.x + p.largeur
+      && place.x + place.largeur > p.x
+      && place.y < p.y + p.hauteur
+      && place.y + place.hauteur > p.y);
+    files.forEach((libelle) => {
+      const b = libelle.getBBox();
+      const pas = b.height;
+      // Un nom qui tombe sur un marqueur est décalé au-dessus ou en dessous avant d'être tu.
+      const tentatives = [0, -1.7, 1.7, -3.4, 3.4].map((dy) => ({
+        x: b.x - 4, y: b.y - 2 + dy * pas, largeur: b.width + 8, hauteur: b.height + 4, dy,
+      }));
+      const libre = tentatives.find((place) => !genante(place));
+      if (!libre) {
+        libelle.classList.add('is-tiny');
+        return;
+      }
+      if (libre.dy) libelle.setAttribute('transform', `translate(0 ${(libre.dy * pas).toFixed(1)})`);
+      placees.push(libre);
+    });
+  }
+
   frame.replaceChildren(svg);
   frame.removeAttribute('aria-label');
+  boutonReprise?.addEventListener('click', voirLePays);
+  window.addEventListener('resize', ajusterEchelle);
+  ajusterEchelle();
+  disposerLesLibelles();
   afficherResume();
 }
 
