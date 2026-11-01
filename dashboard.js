@@ -2,7 +2,7 @@ const casesBody = document.querySelector('#cases-body');
 const caseDetail = document.querySelector('#case-detail');
 const errorBox = document.querySelector('#dashboard-error');
 const statuses = ['À examiner', 'Orientation à préparer', 'En cours', 'Clôturé'];
-let demoCases = [];
+let caseList = [];
 
 function escapeHtml(value) {
   return String(value).replace(/[&<>"']/g, (character) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[character]);
@@ -20,14 +20,14 @@ function statusClass(status) {
 }
 
 function updateStats() {
-  document.querySelector('#stat-total').textContent = demoCases.length;
-  document.querySelector('#stat-review').textContent = demoCases.filter((item) => item.status === 'À examiner').length;
-  document.querySelector('#stat-orient').textContent = demoCases.filter((item) => ['Orientation à préparer', 'En cours'].includes(item.status)).length;
-  document.querySelector('#stat-priority').textContent = demoCases.filter((item) => item.priority.startsWith('Élevée')).length;
+  document.querySelector('#stat-total').textContent = caseList.length;
+  document.querySelector('#stat-review').textContent = caseList.filter((item) => item.status === 'À examiner').length;
+  document.querySelector('#stat-orient').textContent = caseList.filter((item) => ['Orientation à préparer', 'En cours'].includes(item.status)).length;
+  document.querySelector('#stat-priority').textContent = caseList.filter((item) => item.priority.startsWith('Élevée')).length;
 }
 
 function renderCases() {
-  casesBody.innerHTML = demoCases.map((item) => `<tr data-case-id="${escapeHtml(item.id)}" tabindex="0" aria-label="Ouvrir le dossier ${escapeHtml(item.id)}" class="${item.id === selectedId ? 'selected' : ''}">
+  casesBody.innerHTML = caseList.map((item) => `<tr data-case-id="${escapeHtml(item.id)}" tabindex="0" aria-label="Ouvrir le dossier ${escapeHtml(item.id)}" class="${item.id === selectedId ? 'selected' : ''}">
     <td><strong>${escapeHtml(item.id)}</strong><small>${escapeHtml(formatDate(item.createdAt))}</small></td>
     <td>${escapeHtml(item.area)}</td><td>${escapeHtml(item.category)}</td><td><span class="priority-label">${escapeHtml(item.priority)}</span></td>
     <td><span class="status-badge ${statusClass(item.status)}"><i></i>${escapeHtml(item.status)}</span></td>
@@ -37,8 +37,8 @@ function renderCases() {
     row.addEventListener('keydown', (event) => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); selectCase(row.dataset.caseId); } });
   });
   updateStats();
-  if (selectedId && demoCases.some((item) => item.id === selectedId)) renderDetail(demoCases.find((item) => item.id === selectedId));
-  else if (demoCases.length) selectCase(demoCases[0].id);
+  if (selectedId && caseList.some((item) => item.id === selectedId)) renderDetail(caseList.find((item) => item.id === selectedId));
+  else if (caseList.length) selectCase(caseList[0].id);
 }
 
 let selectedId = null;
@@ -63,7 +63,7 @@ function startEvents() {
 function selectCase(id) {
   selectedId = id;
   casesBody.querySelectorAll('tr[data-case-id]').forEach((row) => row.classList.toggle('selected', row.dataset.caseId === id));
-  renderDetail(demoCases.find((item) => item.id === id));
+  renderDetail(caseList.find((item) => item.id === id));
 }
 
 function renderDetail(item) {
@@ -79,16 +79,16 @@ async function loadCases() {
   errorBox.hidden = true;
   try {
     const response = await fetch('/api/cases', { cache: 'no-store' });
-    if (!response.ok) throw new Error(response.status === 401 ? 'Connexion requise. Relancez le serveur local et utilisez le mot de passe affiché dans son terminal.' : 'Impossible de charger les données de démonstration.');
+    if (!response.ok) throw new Error(response.status === 401 ? 'Connexion requise. Relancez le serveur local et utilisez le mot de passe affiché dans son terminal.' : 'Impossible de charger les dossiers.');
     const result = await response.json();
     if (!result.demo) throw new Error('Impossible de charger les dossiers.');
-    demoCases = result.cases;
+    caseList = result.cases;
     renderCases();
     startEvents();
   } catch (error) {
-    errorBox.textContent = `${error.message} Cette page fonctionne uniquement avec le serveur local Sutura.`;
+    errorBox.textContent = `${error.message} Vérifiez la connexion au serveur Sutura.`;
     errorBox.hidden = false;
-    casesBody.innerHTML = '<tr><td colspan="5" class="loading">Aucune connexion au serveur de démonstration.</td></tr>';
+    casesBody.innerHTML = '<tr><td colspan="5" class="loading">Chargement impossible.</td></tr>';
   }
 }
 
@@ -97,7 +97,7 @@ async function updateStatus(id, status) {
     const response = await fetch(`/api/cases/${encodeURIComponent(id)}`, { method: 'PATCH', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ status }) });
     const result = await response.json();
     if (!response.ok || !result.demo) throw new Error(result.error || 'Mise à jour impossible.');
-    demoCases = demoCases.map((item) => item.id === id ? result.case : item);
+    caseList = caseList.map((item) => item.id === id ? result.case : item);
     renderCases();
   } catch (error) {
     errorBox.textContent = `${error.message} Aucune structure n’a été contactée.`;
@@ -105,6 +105,33 @@ async function updateStatus(id, status) {
     loadCases();
   }
 }
+
+const intakeForm = document.querySelector('#intake-form');
+const intakeStatus = document.querySelector('#intake-status');
+
+intakeForm?.addEventListener('submit', async (event) => {
+  event.preventDefault();
+  const button = intakeForm.querySelector('button[type="submit"]');
+  const values = new FormData(intakeForm);
+  button.disabled = true;
+  intakeStatus.textContent = 'Création du dossier…';
+  try {
+    const response = await fetch('/api/cases', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ category: values.get('category'), area: values.get('area') })
+    });
+    const result = await response.json();
+    if (!response.ok) throw new Error(result.error || 'Création impossible.');
+    intakeStatus.textContent = `Dossier ${result.case.id} ouvert · visible sur les postes connectés.`;
+    intakeForm.reset();
+    loadCases();
+  } catch (error) {
+    intakeStatus.textContent = `${error.message} Aucune structure extérieure n’a été contactée.`;
+  } finally {
+    button.disabled = false;
+  }
+});
 
 document.querySelector('#refresh-button').addEventListener('click', loadCases);
 loadCases();

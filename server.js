@@ -26,7 +26,7 @@ function intakeAllowed(ip) {
   const now = Date.now();
   const recent = (intakeWindow.get(ip) || []).filter((time) => now - time < 600000);
   intakeWindow.set(ip, recent);
-  if (recent.length >= 5) return false;
+  if (recent.length >= 10) return false;
   recent.push(now);
   if (intakeWindow.size > 500) intakeWindow.clear();
   return true;
@@ -87,13 +87,14 @@ function getRequestBody(request) {
 
 async function handleApi(request, response, pathname) {
   if (request.method === 'POST' && pathname === '/api/cases') {
+    if (!authorized(request, response)) return;
     let body;
     try { body = await getRequestBody(request); } catch (error) { return sendJson(response, 400, { error: error.message }); }
     if (!intakeAllowed(request.socket?.remoteAddress)) {
-      return sendJson(response, 429, { error: 'Trop de demandes de démonstration. Patientez quelques minutes.' });
+      return sendJson(response, 429, { error: 'Trop de créations depuis ce poste. Patientez quelques minutes.' });
     }
-    if (body.scenario !== true || !allowedAreas.has(body.area) || !allowedCategories.has(body.category)) {
-      return sendJson(response, 400, { error: 'Choisissez une zone et un besoin du scénario de présentation.' });
+    if (!allowedAreas.has(body.area) || !allowedCategories.has(body.category)) {
+      return sendJson(response, 400, { error: 'Choisissez une zone et un besoin dans la liste.' });
     }
     const cases = readCases();
     let id;

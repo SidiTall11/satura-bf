@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#222541">
   <meta name="robots" content="noindex, nofollow">
-  <title>Tableau de bord · Démonstration Sutura</title>
+  <title>Tableau de coordination · Sutura</title>
   <link rel="stylesheet" href="fonts.css"><link rel="stylesheet" href="dashboard.css">
   <script src="dashboard.js" defer></script>
 </head>
@@ -19,12 +19,21 @@
   </aside>
   <main class="dash-main">
     <header class="dash-topbar"><div><span class="dash-eyebrow">SUTURA · COORDINATION</span><h1>Tableau de bord</h1></div><div class="dash-user"><span class="avatar">ST</span><span>Équipe Sutura<small>Burkina Faso</small></span></div></header>
-    <section class="demo-banner" role="status"><span class="demo-icon">↗</span><p><strong>Activité du parcours d’orientation</strong> <span>· Suivi des demandes, priorités d’équipe et relais partenaires.</span></p><span class="demo-tag">APERÇU HACKATHON</span></section>
+    <section class="coordination-note" role="status"><span class="note-icon">↗</span><p><strong>Activité du parcours d’orientation</strong> <span>· Suivi des demandes, priorités d’équipe et relais partenaires.</span></p></section>
     <section class="dash-stats" aria-label="Indicateurs du parcours">
       <article><span class="stat-label">Demandes reçues</span><strong id="stat-total">—</strong><span class="stat-foot">Sur la période affichée</span><span class="stat-icon orange">▤</span></article>
       <article><span class="stat-label">À examiner</span><strong id="stat-review">—</strong><span class="stat-foot">Revue par l’équipe</span><span class="stat-icon blue">◎</span></article>
       <article><span class="stat-label">Orientations en cours</span><strong id="stat-orient">—</strong><span class="stat-foot">Relais à coordonner</span><span class="stat-icon green">↗</span></article>
       <article><span class="stat-label">Priorité élevée</span><strong id="stat-priority">—</strong><span class="stat-foot">Évaluation par l’équipe</span><span class="stat-icon violet">◇</span></article>
+    </section>
+    <section class="intake-panel" aria-label="Saisie d’un appel reçu">
+      <div class="intake-copy"><span class="dash-eyebrow">SAISIE APPEL ENTRANT</span><h2>Ouvrir un dossier après l’appel</h2><p>L’agent note le besoin exprimé et la zone. Le dossier apparaît aussitôt sur les postes de coordination ouverts.</p></div>
+      <form id="intake-form" class="intake-form">
+        <label>Besoin exprimé<select name="category" required><option value="">Choisir un besoin</option><option>Écoute et soutien</option><option>Orientation psychosociale</option><option>Information juridique</option><option>Mise à l’abri</option><option>Information santé</option></select></label>
+        <label>Zone concernée<select name="area" required><option value="">Choisir une zone</option><option>Ouagadougou · Centre</option><option>Bobo-Dioulasso · Houet</option><option>Koudougou · Boulkiemdé</option><option>Tenkodogo · Boulgou</option><option>Ouahigouya · Yatenga</option></select></label>
+        <button type="submit" class="intake-submit">Créer le dossier <span>→</span></button>
+      </form>
+      <p id="intake-status" class="intake-status" role="status" aria-live="polite">Aucune identité, aucun numéro ni récit n’est enregistré ici.</p>
     </section>
     <section class="dash-content">
       <div class="case-panel">
@@ -35,8 +44,8 @@
       </div>
       <aside class="detail-panel"><div class="detail-top"><span class="dash-eyebrow">FICHE DE SUIVI</span><span class="detail-lock">⌑ Accès équipe</span></div><div id="case-detail" class="case-detail"><div class="detail-empty"><span>◎</span><h3>Sélectionnez un dossier</h3><p>Consultez les besoins et préparez l’orientation adaptée.</p></div></div></aside>
     </section>
-    <section class="demo-workflow"><div><span class="dash-eyebrow">PARCOURS DE PRISE EN CHARGE</span><h2>De la demande à l’orientation</h2></div><div class="workflow-steps"><article><span>01</span><strong>Écouter</strong><small>Comprendre le besoin exprimé</small></article><b>→</b><article><span>02</span><strong>Évaluer</strong><small>Revue et priorité par l’équipe</small></article><b>→</b><article><span>03</span><strong>Orienter</strong><small>Coordonner avec le relais adapté</small></article></div></section>
-    <footer class="dash-footer"><span>© 2026 Sutura · Prototype de hackathon</span><a href="numero-vert.html">Voir le parcours public ↗</a></footer>
+    <section class="workflow-panel"><div><span class="dash-eyebrow">PARCOURS DE PRISE EN CHARGE</span><h2>De la demande à l’orientation</h2></div><div class="workflow-steps"><article><span>01</span><strong>Écouter</strong><small>Comprendre le besoin exprimé</small></article><b>→</b><article><span>02</span><strong>Évaluer</strong><small>Revue et priorité par l’équipe</small></article><b>→</b><article><span>03</span><strong>Orienter</strong><small>Coordonner avec le relais adapté</small></article></div></section>
+    <footer class="dash-footer"><span>© 2026 Sutura · Espace de coordination</span><a href="numero-vert.html">Voir le parcours public ↗</a></footer>
   </main>
 </body>
 </html>
