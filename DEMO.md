@@ -29,6 +29,14 @@ Pour réinitialiser les statuts, arrêter le serveur, supprimer le dossier local
 
 Le serveur écoute uniquement sur `127.0.0.1`. Il n’est pas déployé par la configuration Netlify du site statique. Le formulaire interactif accepte uniquement une zone et un besoin prédéfinis; il ne reçoit pas d’appel et ne collecte ni récit, ni identité, ni numéro, ni audio. Le tableau de bord ne déclenche pas de SMS, WhatsApp ou rappel. L’authentification temporaire sert à la présentation locale; ce n’est pas un système de comptes adapté à des données sensibles réelles.
 
+## Deux publications depuis le même dépôt
+
+Le dépôt sert deux choses différentes, et elles ne doivent pas être publiées de la même manière.
+
+La **vitrine** — les pages publiques et l'annuaire — est faite pour rester en ligne en permanence. Publiée sur un hébergement statique, elle appelle `/healthz` au chargement de la page du numéro vert ; si l'API n'est pas là, le parcours de démonstration et le lien vers le tableau de bord disparaissent d'eux-mêmes. `_redirects` masque en plus `dashboard.html`. Rien sur la vitrine ne peut donc proposer un service qui ne répondrait pas.
+
+La **démonstration** — formulaire, tableau de coordination, flux temps réel — est un outil de soutenu. Elle a besoin du serveur Node et de l'API, donc d'un poste local ou d'une instance dédiée. C'est elle que l'équipe fait tourner le 7 ou 12 novembre.
+
 ## Préparer un hébergement Render pour le prototype
 
 Le Blueprint Render utilise le plan gratuit. Le serveur écoute sur `0.0.0.0` en production, utilise le port fourni par l’hébergeur et expose `/healthz`. Le dossier JSON est conservé uniquement dans le système de fichiers éphémère du service. La page publique et l’API restent sur le même service/origine pour le flux temps réel.

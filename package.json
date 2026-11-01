@@ -1,0 +1,14 @@
+{
+  "name": "satura-bf",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Sutura Burkina Faso — vitrine d'orientation vers les ressources d'accompagnement des violences basées sur le genre, avec un tableau de coordination de démonstration.",
+  "license": "Apache-2.0",
+  "scripts": {
+    "start": "node server.js",
+    "check": "node --check server.js && node --check script.js && node --check dashboard.js"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
