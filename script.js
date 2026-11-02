@@ -56,6 +56,101 @@ document.addEventListener('keydown', (event) => {
   }
 });
 
+// Mode hors ligne : rien n'est enregistré sur l'appareil sans un geste explicite.
+const CACHE_HORS_LIGNE = 'sutura-hors-ligne-v1';
+const horsLigneDisponible = 'serviceWorker' in navigator && 'caches' in window && window.isSecureContext;
+const dateLisible = (date) => date.toLocaleString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+
+async function dateDeLaCopie() {
+  // caches.open créerait un cache vide : on vérifie son existence sans laisser de trace.
+  if (!(await caches.has(CACHE_HORS_LIGNE))) return null;
+  const etat = await caches.match('hors-ligne-etat', { cacheName: CACHE_HORS_LIGNE });
+  if (!etat) return null;
+  const { miseAJour } = await etat.json();
+  return new Date(miseAJour);
+}
+
+function installationTerminee(inscription) {
+  return new Promise((resolve, reject) => {
+    const travailleur = inscription.installing || inscription.waiting;
+    if (!travailleur) return resolve();
+    travailleur.addEventListener('statechange', () => {
+      if (travailleur.state === 'activated') resolve();
+      if (travailleur.state === 'redundant') reject(new Error('installation interrompue'));
+    });
+  });
+}
+
+async function signalerConnexion() {
+  const present = document.querySelector('.offline-banner');
+  if (navigator.onLine) {
+    present?.remove();
+    return;
+  }
+  const date = navigator.serviceWorker.controller ? await dateDeLaCopie() : null;
+  const bandeau = present || noeudHtml('p', 'offline-banner');
+  bandeau.setAttribute('role', 'status');
+  bandeau.textContent = date
+    ? `Hors connexion. Vous lisez la copie enregistrée sur cet appareil, mise à jour le ${dateLisible(date)}. Les numéros d’urgence fonctionnent : un appel téléphonique ne passe pas par Internet.`
+    : 'Connexion perdue. Cette page reste lisible tant qu’elle est ouverte, et les numéros d’urgence s’appellent sans Internet.';
+  if (!present) {
+    const notice = document.querySelector('.notice');
+    if (notice) notice.after(bandeau);
+    else document.body.prepend(bandeau);
+  }
+}
+
+if (horsLigneDisponible) {
+  window.addEventListener('offline', signalerConnexion);
+  window.addEventListener('online', signalerConnexion);
+  if (!navigator.onLine) signalerConnexion();
+}
+
+const carteHorsLigne = document.querySelector('#hors-ligne');
+if (carteHorsLigne && horsLigneDisponible) {
+  const boutonActiver = document.querySelector('#offline-enable');
+  const boutonRetirer = document.querySelector('#offline-remove');
+  const statut = document.querySelector('#offline-status');
+  carteHorsLigne.hidden = false;
+
+  const afficherEtat = async () => {
+    const date = await dateDeLaCopie();
+    boutonActiver.hidden = Boolean(date);
+    boutonRetirer.hidden = !date;
+    carteHorsLigne.classList.toggle('is-saved', Boolean(date));
+    statut.textContent = date ? `Enregistré sur cet appareil · dernière mise à jour le ${dateLisible(date)}.` : '';
+    return date;
+  };
+
+  boutonActiver.addEventListener('click', async () => {
+    boutonActiver.disabled = true;
+    statut.textContent = 'Enregistrement en cours…';
+    try {
+      await installationTerminee(await navigator.serviceWorker.register('sw.js'));
+      if (!(await afficherEtat())) throw new Error('copie absente');
+      statut.textContent += ' Vous pouvez couper la connexion : ces pages s’ouvriront quand même.';
+      boutonRetirer.focus();
+    } catch {
+      statut.textContent = 'L’enregistrement n’a pas abouti. Vérifiez la connexion, puis réessayez.';
+    }
+    boutonActiver.disabled = false;
+  });
+
+  boutonRetirer.addEventListener('click', async () => {
+    boutonRetirer.disabled = true;
+    const inscriptions = await navigator.serviceWorker.getRegistrations();
+    await Promise.all(inscriptions.map((inscription) => inscription.unregister()));
+    const noms = await caches.keys();
+    await Promise.all(noms.filter((nom) => nom.startsWith('sutura-hors-ligne-')).map((nom) => caches.delete(nom)));
+    boutonRetirer.disabled = false;
+    await afficherEtat();
+    statut.textContent = 'La copie hors ligne a été retirée de ce navigateur. Sur un appareil partagé, pensez aussi à effacer l’historique de navigation.';
+    boutonActiver.focus();
+  });
+
+  afficherEtat();
+}
+
 
 
 // Annuaire: local filtering, no third-party tracking or user data submission.

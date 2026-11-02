@@ -163,7 +163,7 @@ const server = http.createServer(async (request, response) => {
   }
   // Le serveur ne livre que le site : ni son propre code, ni sa configuration.
   const isPage = requested.endsWith('.html') && !requested.slice(1).includes('/');
-  const isRuntime = ['/fonts.css', '/styles.css', '/dashboard.css', '/script.js', '/dashboard.js'].includes(requested);
+  const isRuntime = ['/fonts.css', '/styles.css', '/dashboard.css', '/script.js', '/dashboard.js', '/sw.js'].includes(requested);
   if (!isPage && !isRuntime && !requested.startsWith('/assets/')) {
     response.writeHead(404, { 'content-type': 'text/plain; charset=utf-8' });
     return response.end('Page introuvable.');
